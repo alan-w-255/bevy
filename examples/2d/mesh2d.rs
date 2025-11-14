@@ -1,6 +1,6 @@
 //! Shows how to render a polygonal [`Mesh`], generated from a [`Rectangle`] primitive, in a 2D scene.
 
-use bevy::{color::palettes::basic::PURPLE, prelude::*};
+use bevy::{color::palettes::basic::PURPLE, mesh::VertexAttributeValues, prelude::*};
 
 fn main() {
     App::new()
@@ -24,24 +24,32 @@ fn setup(
     ));
 }
 
-#[derive(Resource, Default)]
-struct Polygon();
-
 fn input_system(
-    mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    query: Query<Entity, With<Mesh2d>>,
+    query: Single<&Mesh2d>,
 ) {
-    for (entity) in query {
-        if keyboard_input.just_pressed(KeyCode::ArrowDown) {
-            println!("down");
-            commands
-                .entity(entity)
-                .insert(Mesh2d(meshes.add(RegularPolygon::new(1.0, 7))));
+    let Some(mesh) = meshes.get_mut(*query) else {
+        return;
+    };
+    let Some(VertexAttributeValues::Float32x3(positions)) =
+        mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
+    else {
+        return;
+    };
+    if keyboard_input.just_pressed(KeyCode::ArrowDown) {
+        println!("down");
+        for position in positions {
+            position[0] /= 2.0;
+            position[1] /= 2.0;
+            position[2] /= 2.0;
         }
-        if keyboard_input.just_pressed(KeyCode::ArrowUp) {
-            println!("up");
+    } else if keyboard_input.just_pressed(KeyCode::ArrowUp) {
+        println!("up");
+        for position in positions {
+            position[0] *= 2.0;
+            position[1] *= 2.0;
+            position[2] *= 2.0;
         }
     }
 }
