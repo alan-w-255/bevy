@@ -36,6 +36,7 @@ fn input_system(
     let (mut mesh, mut sides) = query.into_inner();
     if keyboard_input.just_pressed(KeyCode::ArrowDown) {
         sides.0 -= if sides.0 > 3 { 1 } else { 0 };
+        meshes.remove(mesh.0.id());
         mesh.0 = meshes.add(RegularPolygon::new(1.0, sides.0));
         println!("down");
     } else if keyboard_input.just_pressed(KeyCode::ArrowUp) {
