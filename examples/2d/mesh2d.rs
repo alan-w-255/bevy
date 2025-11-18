@@ -27,7 +27,7 @@ fn setup(
 
     commands.spawn((
         PolygonSideCount(3u32),
-        Mesh2d(meshes.add(RegularPolygon::new(1.0, 3u32))),
+        Mesh2d(meshes.add(RegularPolygon::new(2.5, 3u32).to_ring(1.0))),
         MeshMaterial2d(materials.add(Color::from(PURPLE))),
         Transform::default().with_scale(Vec3::splat(128.)),
     ));
@@ -44,15 +44,13 @@ fn input_system(
         sides.0 -= if sides.0 > 3 { 1 } else { 0 };
     } else if keyboard_input.just_pressed(KeyCode::ArrowUp) {
         sides.0 += 1;
-        mesh.0 = meshes.add(RegularPolygon::new(1.0, sides.0));
     } else {
         return;
     }
     if let Some(mesh_handle) = poly_map.0.get(&sides.0) {
         mesh.0 = mesh_handle.clone();
-        println!("found cache");
     } else {
-        let mesh_handle = meshes.add(RegularPolygon::new(1.0, sides.0));
+        let mesh_handle = meshes.add(RegularPolygon::new(2.5, sides.0).to_ring(1.0));
         poly_map.0.insert(sides.0, mesh_handle.clone());
         mesh.0 = mesh_handle;
     }
