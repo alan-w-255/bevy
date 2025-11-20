@@ -39,7 +39,7 @@ fn setup(
 
     commands.spawn((
         PolygonSideCount(3u32),
-        Mesh2d(meshes.add(RegularPolygon::new(2.5, 3u32).to_ring(1.0))),
+        Mesh2d(meshes.add(gen_polygon_ring_mesh(3))),
         MeshMaterial2d(materials.add(Color::from(PURPLE))),
         Transform::default().with_scale(Vec3::splat(128.)),
     ));
