@@ -45,6 +45,8 @@ fn setup(
     ));
 }
 
+// todo: 屏幕分辨率变化信号处理。学习一下 bevy 的 event 处理。
+
 fn input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut poly_map: ResMut<PolyMeshMap>,
