@@ -1,12 +1,24 @@
 //! Shows how to render a polygonal [`Mesh`], generated from a [`Rectangle`] primitive, in a 2D scene.
 
-use bevy::{color::palettes::basic::PURPLE, platform::collections::HashMap, prelude::*};
+use std::f32::consts::PI;
+
+use bevy::mesh::{Indices, PrimitiveTopology};
+use bevy::{
+    color::palettes::basic::PURPLE, input::common_conditions::input_just_pressed,
+    platform::collections::HashMap, prelude::*,
+};
+use bevy_asset::RenderAssetUsages;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(Update, input_system)
+        .add_systems(
+            Update,
+            input_system.run_if(
+                input_just_pressed(KeyCode::ArrowUp).or(input_just_pressed(KeyCode::ArrowDown)),
+            ),
+        )
         .run();
 }
 
@@ -50,7 +62,25 @@ fn input_system(
     if let Some(mesh_handle) = poly_map.0.get(&sides.0) {
         mesh.0 = mesh_handle.clone();
     } else {
-        let mesh_handle = meshes.add(RegularPolygon::new(2.5, sides.0).to_ring(1.0));
+        let mut poly_mesh = Mesh::new(
+            PrimitiveTopology::TriangleStrip,
+            RenderAssetUsages::RENDER_WORLD,
+        );
+        let mut vertices = vec![];
+        let outer_r = 2.0f32;
+        let inner_r = 1.0f32;
+        for i in 0..sides.0 {
+            let a = i as f32 * PI * 2.0 / sides.0 as f32;
+            vertices.push([inner_r * ops::cos(a), inner_r * ops::sin(a), 0.0]);
+            vertices.push([outer_r * ops::cos(a), outer_r * ops::sin(a), 0.0]);
+        }
+        poly_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
+        let mut indices = vec![];
+        for i in 0..sides.0 * 2 - 2 {
+            indices.extend_from_slice(&[i, i + 1, i + 2]);
+        }
+        poly_mesh.insert_indices(Indices::U32(indices));
+        let mesh_handle = meshes.add(poly_mesh);
         poly_map.0.insert(sides.0, mesh_handle.clone());
         mesh.0 = mesh_handle;
     }
