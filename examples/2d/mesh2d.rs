@@ -76,8 +76,8 @@ fn input_system(
         }
         poly_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
         let mut indices = vec![];
-        for i in 0..sides.0 * 2 - 2 {
-            indices.extend_from_slice(&[i, i + 1, i + 2]);
+        for i in 0..sides.0 * 2 {
+            indices.extend_from_slice(&[i, (i + 1) % (sides.0 * 2), (i + 2) % (sides.0 * 2)]);
         }
         poly_mesh.insert_indices(Indices::U32(indices));
         let mesh_handle = meshes.add(poly_mesh);
