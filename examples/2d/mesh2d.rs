@@ -68,7 +68,7 @@ fn input_system(
         );
         let mut vertices = vec![];
         let outer_r = 2.0f32;
-        let inner_r = 1.0f32;
+        let inner_r = 1.7f32;
         for i in 0..sides.0 {
             let a = i as f32 * PI * 2.0 / sides.0 as f32;
             vertices.push([inner_r * ops::cos(a), inner_r * ops::sin(a), 0.0]);
@@ -76,8 +76,8 @@ fn input_system(
         }
         poly_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
         let mut indices = vec![];
-        for i in 0..sides.0 * 2 {
-            indices.extend_from_slice(&[i, (i + 1) % (sides.0 * 2), (i + 2) % (sides.0 * 2)]);
+        for i in 0..sides.0 * 2 - 2 {
+            indices.extend_from_slice(&[i, i + 1, i + 2]);
         }
         poly_mesh.insert_indices(Indices::U32(indices));
         let mesh_handle = meshes.add(poly_mesh);
