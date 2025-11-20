@@ -62,26 +62,30 @@ fn input_system(
     if let Some(mesh_handle) = poly_map.0.get(&sides.0) {
         mesh.0 = mesh_handle.clone();
     } else {
-        let mut poly_mesh = Mesh::new(
-            PrimitiveTopology::TriangleStrip,
-            RenderAssetUsages::RENDER_WORLD,
-        );
-        let mut vertices = vec![];
-        let outer_r = 2.0f32;
-        let inner_r = 1.7f32;
-        for i in 0..sides.0 {
-            let a = i as f32 * PI * 2.0 / sides.0 as f32;
-            vertices.push([inner_r * ops::cos(a), inner_r * ops::sin(a), 0.0]);
-            vertices.push([outer_r * ops::cos(a), outer_r * ops::sin(a), 0.0]);
-        }
-        poly_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
-        let mut indices = vec![];
-        for i in 0..sides.0 * 2 - 2 {
-            indices.extend_from_slice(&[i, i + 1, i + 2]);
-        }
-        poly_mesh.insert_indices(Indices::U32(indices));
-        let mesh_handle = meshes.add(poly_mesh);
+        let mesh_handle = meshes.add(gen_polygon_ring_mesh(sides.0));
         poly_map.0.insert(sides.0, mesh_handle.clone());
         mesh.0 = mesh_handle;
     }
+}
+
+fn gen_polygon_ring_mesh(side_count: u32) -> Mesh {
+    let mut poly_mesh = Mesh::new(
+        PrimitiveTopology::TriangleStrip,
+        RenderAssetUsages::RENDER_WORLD,
+    );
+    let mut vertices = vec![];
+    let outer_r = 2.0f32;
+    let inner_r = 1.7f32;
+    for i in 0..side_count {
+        let a = i as f32 * PI * 2.0 / side_count as f32;
+        vertices.push([inner_r * ops::cos(a), inner_r * ops::sin(a), 0.0]);
+        vertices.push([outer_r * ops::cos(a), outer_r * ops::sin(a), 0.0]);
+    }
+    poly_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
+    let mut indices = vec![];
+    for i in 0..side_count * 2 - 2 {
+        indices.extend_from_slice(&[i, i + 1, i + 2]);
+    }
+    poly_mesh.insert_indices(Indices::U32(indices));
+    return poly_mesh;
 }
