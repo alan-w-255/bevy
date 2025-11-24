@@ -4,7 +4,7 @@ use std::f32::consts::PI;
 
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::{
-    color::palettes::basic::PURPLE, input::common_conditions::input_just_pressed,
+    color::palettes::basic::*, input::common_conditions::input_just_pressed,
     platform::collections::HashMap, prelude::*,
 };
 use bevy_asset::RenderAssetUsages;
@@ -15,8 +15,11 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             Update,
-            input_system.run_if(
-                input_just_pressed(KeyCode::ArrowUp).or(input_just_pressed(KeyCode::ArrowDown)),
+            (
+                input_system.run_if(
+                    input_just_pressed(KeyCode::ArrowUp).or(input_just_pressed(KeyCode::ArrowDown)),
+                ),
+                player_control_system,
             ),
         )
         .run();
@@ -28,6 +31,9 @@ struct PolyMeshMap(HashMap<u32, Handle<Mesh>>);
 
 #[derive(Component)]
 struct PolygonSideCount(u32);
+
+#[derive(Component)]
+struct Player;
 
 fn setup(
     mut commands: Commands,
@@ -43,9 +49,15 @@ fn setup(
         MeshMaterial2d(materials.add(Color::from(PURPLE))),
         Transform::default().with_scale(Vec3::splat(128.)),
     ));
+    commands.spawn((
+        Player,
+        Mesh2d(meshes.add(RegularPolygon::new(50.0, 3))),
+        MeshMaterial2d(materials.add(Color::from(RED))),
+        Transform::default(),
+    ));
 }
 
-// todo: 屏幕分辨率变化信号处理。学习一下 bevy 的 event 处理。
+// todo: 添加运动控制
 
 fn input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -67,6 +79,19 @@ fn input_system(
         let mesh_handle = meshes.add(gen_polygon_ring_mesh(sides.0));
         poly_map.0.insert(sides.0, mesh_handle.clone());
         mesh.0 = mesh_handle;
+    }
+}
+
+fn player_control_system(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    query: Single<&mut Transform, With<Player>>,
+) {
+    let mut playger_transform = query.into_inner();
+    if keyboard_input.pressed(KeyCode::ArrowLeft) {
+        // rotate left
+        playger_transform.rotate_z(0.1);
+    } else if keyboard_input.pressed(KeyCode::ArrowRight) {
+        playger_transform.rotate_z(-0.1);
     }
 }
 
